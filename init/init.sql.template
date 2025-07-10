@@ -15,8 +15,25 @@ CREATE TABLE IF NOT EXISTS ${CLICKHOUSE_DB}.audit_transactions (
 ENGINE = MergeTree
 ORDER BY (changed_at, transaction_id);
 
-CREATE SETTINGS PROFILE readonly_profile SETTINGS readonly = 1;
+-- Профиль без readonly, чтобы разрешить CREATE VIEW
+DROP SETTINGS PROFILE IF EXISTS limited_profile;
 
-CREATE USER ${CLICKHOUSE_USER_READONLY} IDENTIFIED WITH plaintext_password BY '${CLICKHOUSE_PASSWORD_READONLY}' SETTINGS PROFILE 'readonly_profile';
+CREATE SETTINGS PROFILE limited_profile SETTINGS
+    allow_experimental_lightweight_delete = 0;
 
-GRANT SHOW TABLES, SELECT ON ${CLICKHOUSE_DB}.* TO ${CLICKHOUSE_USER_READONLY};
+-- Удалим пользователя, если уже существует
+DROP USER IF EXISTS ${CLICKHOUSE_USER_READONLY};
+
+-- Создаём пользователя с этим профилем
+CREATE USER ${CLICKHOUSE_USER_READONLY}
+    IDENTIFIED WITH plaintext_password BY '${CLICKHOUSE_PASSWORD_READONLY}'
+    SETTINGS PROFILE 'limited_profile';
+
+-- Даём только необходимые права (нет INSERT, DROP и т.д.)
+GRANT SHOW TABLES, SELECT, CREATE VIEW, DROP VIEW ON ${CLICKHOUSE_DB}.* TO ${CLICKHOUSE_USER_READONLY};
+
+-- Временный пользователь для вставки данных
+DROP USER IF EXISTS temp_loader;
+
+CREATE USER temp_loader IDENTIFIED WITH plaintext_password BY 'loader_pass';
+GRANT ALL ON ${CLICKHOUSE_DB}.* TO temp_loader;
