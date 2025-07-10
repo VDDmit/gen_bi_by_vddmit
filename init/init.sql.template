@@ -1,0 +1,22 @@
+CREATE DATABASE IF NOT EXISTS ${CLICKHOUSE_DB};
+
+CREATE TABLE IF NOT EXISTS ${CLICKHOUSE_DB}.audit_transactions (
+    transaction_id UUID,
+    field_changed String,
+    old_value String,
+    new_value String,
+    changed_at DateTime,
+    user_id UUID,
+    is_ai UInt8,
+    comment String,
+    transaction_type String,
+    change_id UUID
+)
+ENGINE = MergeTree
+ORDER BY (changed_at, transaction_id);
+
+CREATE SETTINGS PROFILE readonly_profile SETTINGS readonly = 1;
+
+CREATE USER ${CLICKHOUSE_USER_READONLY} IDENTIFIED WITH plaintext_password BY '${CLICKHOUSE_PASSWORD_READONLY}' SETTINGS PROFILE 'readonly_profile';
+
+GRANT SHOW TABLES, SELECT ON ${CLICKHOUSE_DB}.* TO ${CLICKHOUSE_USER_READONLY};

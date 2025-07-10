@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+claude-env
+.env
+.venv/
+env/
+venv/
+pip-log.txt
+
+# Jupyter
+.ipynb_checkpoints
+
+# Docker
+*.log
+docker-compose.override.yml
+docker-compose*.local.yml
+clickhouse_data/
+clickhouse_logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor/IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# WrenAI build artifacts
+WrenAI/.env
+WrenAI/docker/.env
+WrenAI/docker/config.yaml
+WrenAI/docker/bootstrap/
+WrenAI/docker/qdrant_storage/
+
+# CSV / seed data
+*.csv
+*.tsv
+
+# Secrets / keys
+secret*.yaml
+*.key
+*.pem
