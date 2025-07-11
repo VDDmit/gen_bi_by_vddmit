@@ -40,7 +40,7 @@ WrenAI/docker/bootstrap/
 WrenAI/docker/qdrant_storage/
 
 # CSV / seed data
-*.csv
+#*.csv
 *.tsv
 
 # Secrets / keys
