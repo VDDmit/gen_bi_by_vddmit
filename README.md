@@ -20,18 +20,63 @@ This will start the application using existing Docker images without rebuilding 
 
 ---
 
-## Environment Variables
+## Environment Variables for Gemini
 
 Create `.env` file in the project root:
 
 ```dotenv
+# --- General Docker ---
+COMPOSE_PROJECT_NAME=wrenai
+PLATFORM=linux/amd64
+PROJECT_DIR=.
+
+# --- Ports ---
+WREN_ENGINE_PORT=8080
+WREN_ENGINE_SQL_PORT=7432
+WREN_AI_SERVICE_PORT=5555
+IBIS_SERVER_PORT=8000
+WREN_UI_PORT=3000
+HOST_PORT=3000
+AI_SERVICE_FORWARD_PORT=5555
+WREN_UI_ENDPOINT=http://wren-ui:${WREN_UI_PORT}
+
 # --- Gemini ---
 LLM_PROVIDER=gemini
+GEMINI_API_KEY=<your-gemini-api-key>  # Replace with your actual Gemini API key
+GENERATION_MODEL=gemini/gemini-2.0-flash
 
-GEMINI_API_KEY=<yours gemini api key>
+# --- ClickHouse ---
+IMAGE_VERSION=25.5.6.14
+CLICKHOUSE_HTTP_PORT=8123
+CLICKHOUSE_TCP_PORT=9000
+CLICKHOUSE_USER_READONLY=gen_bi_usr
+CLICKHOUSE_PASSWORD_READONLY=gen_bi_pass
+CLICKHOUSE_DB=gen_bi_db
 
 # ClickHouse connection string
-CLICKHOUSE_DSN=clickhouse://<username>:<password>@<host>:<port>/<database>
+CLICKHOUSE_DSN=clickhouse://gen_bi_usr:gen_bi_pass@clickhouse:9000/gen_bi_db
+
+# --- Optional Analytics / Telemetry ---
+POSTHOG_API_KEY=<your-posthog-key>
+POSTHOG_HOST=https://app.posthog.com
+TELEMETRY_ENABLED=true
+
+# --- Wren Versions ---
+WREN_PRODUCT_VERSION=0.25.0
+WREN_ENGINE_VERSION=0.17.1
+WREN_AI_SERVICE_VERSION=0.24.3
+WREN_UI_VERSION=0.30.0
+IBIS_SERVER_VERSION=0.17.1
+WREN_BOOTSTRAP_VERSION=0.1.5
+
+# --- Optional Tracking ---
+LANGFUSE_PUBLIC_KEY=
+LANGFUSE_SECRET_KEY=
+
+# --- Flags ---
+SHOULD_FORCE_DEPLOY=1
+EXPERIMENTAL_ENGINE_RUST_VERSION=false
+LOG_LEVEL=debug
 ```
 
 ---
@@ -54,12 +99,6 @@ CLICKHOUSE_DSN=clickhouse://<username>:<password>@<host>:<port>/<database>
 
 ```
 top 5 fields changed for sales transactions last quarter and, for each field, most active user
-```
-
-You can also append “as chart” to see the result visualized:
-
-```
-top 5 fields changed for sales transactions last quarter and, for each field, most active user as chart
 ```
 
 ---
