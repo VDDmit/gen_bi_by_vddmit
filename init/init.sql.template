@@ -1,0 +1,500 @@
+CREATE DATABASE IF NOT EXISTS ${CLICKHOUSE_DB};
+
+CREATE TABLE IF NOT EXISTS ${CLICKHOUSE_DB}.transaction_changes  (
+-- Core transaction/change metadata
+clientId UUID,
+client_version UInt32,
+transaction_id UUID,
+transaction_version UInt32,
+changeUuid UUID,
+is_ui_bulk UInt8,                           -- 0=false, 1=true
+transaction_details String,                 -- full current JSON
+-- Document linkage
+document_id UUID,
+document_version UInt32,
+
+-- Entity references
+counterparty_id UUID,
+counterparty_version UInt32,
+bank_account_id UUID,
+bank_account_version UInt32,
+chart_of_account_id UUID,
+chart_of_account_version UInt32,
+who_id UUID,
+backfill_id UUID,
+backfill_model_version String,
+is_termination_snapshot UInt8,               -- 0=false, 1=true
+
+-- Change timestamp
+datetime DateTime,
+
+----------------------------------------------------------------------------
+-- Parsed & flattened transaction‐analysis fields (skip all LIST/ARRAY types)
+----------------------------------------------------------------------------
+notes Nullable(String),
+
+-- currency
+currency_notes Nullable(String),
+currency_value String,
+currency_value_reasoning String,
+currency_confidence_score Float64,
+currency_confidence_score_reasoning String,
+
+-- due_date
+due_date_notes Nullable(String),
+due_date_value Nullable(Date),
+due_date_value_reasoning String,
+due_date_confidence_score Float64,
+due_date_confidence_score_reasoning String,
+
+red_flag Nullable(String),
+
+-- net_amount
+net_amount_notes Nullable(String),
+net_amount_value Float64,
+net_amount_value_reasoning String,
+net_amount_confidence_score Float64,
+net_amount_confidence_score_reasoning String,
+
+-- trade_type
+trade_type_notes Nullable(String),
+trade_type_value String,
+trade_type_value_reasoning String,
+trade_type_confidence_score Float64,
+trade_type_confidence_score_reasoning String,
+
+-- gross_total
+gross_total_value Float64,
+gross_total_value_reasoning String,
+gross_total_confidence_score Float64,
+gross_total_confidence_score_reasoning String,
+
+-- tax_invoice
+tax_invoice_notes Nullable(String),
+tax_invoice_value UInt8,
+tax_invoice_value_reasoning String,
+tax_invoice_confidence_score Float64,
+tax_invoice_confidence_score_reasoning String,
+
+-- timing_type
+timing_type_notes Nullable(String),
+timing_type_value String,
+timing_type_value_reasoning String,
+timing_type_confidence_score Float64,
+timing_type_confidence_score_reasoning String,
+
+-- order_number
+order_number_notes Nullable(String),
+order_number_value Nullable(String),
+order_number_value_reasoning String,
+order_number_confidence_score Float64,
+order_number_confidence_score_reasoning String,
+
+zoho_details Nullable(String),
+
+-- cit_treatment
+cit_treatment_value String,
+cit_treatment_value_reasoning String,
+cit_treatment_confidence_score Float64,
+cit_treatment_confidence_score_reasoning String,
+
+-- fx_net_amount
+fx_net_amount_notes Nullable(String),
+fx_net_amount_value Nullable(Float64),
+fx_net_amount_value_reasoning String,
+fx_net_amount_confidence_score Float64,
+fx_net_amount_confidence_score_reasoning String,
+
+-- purchase_type
+purchase_type_notes Nullable(String),
+purchase_type_value String,
+purchase_type_value_reasoning String,
+purchase_type_confidence_score Float64,
+purchase_type_confidence_score_reasoning String,
+
+-- tax_treatment
+tax_treatment_value String,
+tax_treatment_value_reasoning String,
+tax_treatment_confidence_score Float64,
+tax_treatment_confidence_score_reasoning String,
+
+-- fx_gross_total
+fx_gross_total_notes Nullable(String),
+fx_gross_total_value Nullable(Float64),
+fx_gross_total_value_reasoning String,
+fx_gross_total_confidence_score Float64,
+fx_gross_total_confidence_score_reasoning String,
+
+-- taxable_amount
+taxable_amount_notes Nullable(String),
+taxable_amount_value Float64,
+taxable_amount_value_reasoning String,
+taxable_amount_confidence_score Float64,
+taxable_amount_confidence_score_reasoning String,
+
+-- uae_vat_amount
+uae_vat_amount_notes Nullable(String),
+uae_vat_amount_value Float64,
+uae_vat_amount_value_reasoning String,
+uae_vat_amount_confidence_score Float64,
+uae_vat_amount_confidence_score_reasoning String,
+
+-- discount_amount
+discount_amount_value Float64,
+discount_amount_value_reasoning String,
+discount_amount_confidence_score Float64,
+discount_amount_confidence_score_reasoning String,
+
+-- is_new_category
+is_new_category_notes Nullable(String),
+is_new_category_value UInt8,
+is_new_category_value_reasoning String,
+is_new_category_confidence_score Float64,
+is_new_category_confidence_score_reasoning String,
+
+-- aed_exchange_date
+aed_exchange_date_notes Nullable(String),
+aed_exchange_date Date,
+aed_exchange_date_value_reasoning String,
+aed_exchange_date_confidence_score Float64,
+aed_exchange_date_confidence_score_reasoning String,
+
+-- aed_exchange_rate
+aed_exchange_rate_notes Nullable(String),
+aed_exchange_rate_value Float64,
+aed_exchange_rate_value_reasoning String,
+aed_exchange_rate_confidence_score Float64,
+aed_exchange_rate_confidence_score_reasoning String,
+
+-- fx_uae_vat_amount
+fx_uae_vat_amount_notes Nullable(String),
+fx_uae_vat_amount_value Float64,
+fx_uae_vat_amount_value_reasoning String,
+fx_uae_vat_amount_confidence_score Float64,
+fx_uae_vat_amount_confidence_score_reasoning String,
+
+-- fx_discount_amount
+fx_discount_amount_notes Nullable(String),
+fx_discount_amount_value Nullable(Float64),
+fx_discount_amount_value_reasoning String,
+fx_discount_amount_confidence_score Float64,
+fx_discount_amount_confidence_score_reasoning String,
+
+-- payment_terms_days
+payment_terms_days_notes Nullable(String),
+payment_terms_days_value UInt32,
+payment_terms_days_value_reasoning String,
+payment_terms_days_confidence_score Float64,
+payment_terms_days_confidence_score_reasoning String,
+
+-- transaction_nature
+transaction_nature_notes Nullable(String),
+transaction_nature_value String,
+transaction_nature_value_reasoning String,
+transaction_nature_confidence_score Float64,
+transaction_nature_confidence_score_reasoning String,
+
+-- coverage_period_end
+coverage_period_end_notes Nullable(String),
+coverage_period_end Nullable(DateTime),
+coverage_period_end_is_applicable UInt8,
+coverage_period_end_value_reasoning String,
+coverage_period_end_confidence_score Float64,
+coverage_period_end_confidence_score_reasoning String,
+
+-- coverage_period_start
+coverage_period_start_notes Nullable(String),
+coverage_period_start Nullable(DateTime),
+coverage_period_start_is_applicable UInt8,
+coverage_period_start_value_reasoning String,
+coverage_period_start_confidence_score Float64,
+coverage_period_start_confidence_score_reasoning String,
+
+-- transaction_integrity
+transaction_integrity_notes Nullable(String),
+transaction_integrity_value String,
+transaction_integrity_value_reasoning String,
+transaction_integrity_confidence_score Float64,
+transaction_integrity_confidence_score_reasoning String,
+
+-- transaction_datetime
+transaction_datetime_notes Nullable(String),
+transaction_datetime DateTime,
+transaction_datetime_value_reasoning String,
+transaction_datetime_confidence_score Float64,
+transaction_datetime_confidence_score_reasoning String,
+
+-- transaction_description
+transaction_description_notes Nullable(String),
+transaction_description_value String,
+transaction_description_value_reasoning String,
+transaction_description_confidence_score Float64,
+transaction_description_confidence_score_reasoning String,
+
+-- nullified_uae_vat_amount
+nullified_uae_vat_amount_value Float64,
+nullified_uae_vat_amount_value_reasoning String,
+nullified_uae_vat_amount_confidence_score Float64,
+nullified_uae_vat_amount_confidence_score_reasoning String,
+
+-- chart_of_accounts_category
+chart_of_accounts_category_notes Nullable(String),
+chart_of_accounts_category_value String,
+chart_of_accounts_category_value_reasoning String,
+chart_of_accounts_category_confidence_score Float64,
+chart_of_accounts_category_confidence_score_reasoning String,
+
+-- is_exchange_rate_mentioned
+is_exchange_rate_mentioned_value UInt8,
+is_exchange_rate_mentioned_value_reasoning String,
+is_exchange_rate_mentioned_confidence_score Float64,
+
+-- fx_nullified_uae_vat_amount
+fx_nullified_uae_vat_amount_notes Nullable(String),
+fx_nullified_uae_vat_amount_value Float64,
+fx_nullified_uae_vat_amount_value_reasoning String,
+fx_nullified_uae_vat_amount_confidence_score Float64,
+fx_nullified_uae_vat_amount_confidence_score_reasoning String,
+
+----------------------------------------------------------------------------
+-- Parsed & flattened document metadata fields (skip all LIST/ARRAY types)
+----------------------------------------------------------------------------
+document_size Nullable(UInt64),
+document_channel String,
+document_mimetype Nullable(String),
+document_saved_by String,
+document_created_at DateTime,
+document_collected_at DateTime,
+
+-- clientparty.*
+document_clientparty_type_notes        Nullable(String),
+document_clientparty_type_value        Nullable(String),
+document_clientparty_type_value_reasoning String,
+document_clientparty_type_confidence_score   Float64,
+document_clientparty_type_confidence_score_reasoning String,
+
+document_clientparty_email_notes       Nullable(String),
+document_clientparty_email_value       Nullable(String),
+document_clientparty_email_value_reasoning  String,
+document_clientparty_email_confidence_score Float64,
+document_clientparty_email_confidence_score_reasoning String,
+
+document_clientparty_phone_notes       Nullable(String),
+document_clientparty_phone_value       Nullable(String),
+document_clientparty_phone_value_reasoning  String,
+document_clientparty_phone_confidence_score Float64,
+document_clientparty_phone_confidence_score_reasoning String,
+
+document_clientparty_website_notes     Nullable(String),
+document_clientparty_website_value     Nullable(String),
+document_clientparty_website_value_reasoning String,
+document_clientparty_website_confidence_score Float64,
+document_clientparty_website_confidence_score_reasoning String,
+
+document_clientparty_company_name_notes       Nullable(String),
+document_clientparty_company_name_value       Nullable(String),
+document_clientparty_company_name_value_reasoning  String,
+document_clientparty_company_name_confidence_score Float64,
+document_clientparty_company_name_confidence_score_reasoning String,
+
+document_clientparty_is_retail_shop_notes        Nullable(String),
+document_clientparty_is_retail_shop_value        UInt8,
+document_clientparty_is_retail_shop_value_reasoning String,
+document_clientparty_is_retail_shop_confidence_score Float64,
+document_clientparty_is_retail_shop_confidence_score_reasoning String,
+
+-- clientparty.billing_address.*
+document_clientparty_billing_address_city_notes           Nullable(String),
+document_clientparty_billing_address_city_value           Nullable(String),
+document_clientparty_billing_address_city_value_reasoning String,
+document_clientparty_billing_address_city_confidence_score Float64,
+document_clientparty_billing_address_city_confidence_score_reasoning String,
+
+document_clientparty_billing_address_state_notes           Nullable(String),
+document_clientparty_billing_address_state_value           Nullable(String),
+document_clientparty_billing_address_state_value_reasoning String,
+document_clientparty_billing_address_state_confidence_score Float64,
+document_clientparty_billing_address_state_confidence_score_reasoning String,
+
+document_clientparty_billing_address_street_notes           Nullable(String),
+document_clientparty_billing_address_street_value           Nullable(String),
+document_clientparty_billing_address_street_value_reasoning String,
+document_clientparty_billing_address_street_confidence_score Float64,
+document_clientparty_billing_address_street_confidence_score_reasoning String,
+
+document_clientparty_billing_address_country_notes           Nullable(String),
+document_clientparty_billing_address_country_value           Nullable(String),
+document_clientparty_billing_address_country_value_reasoning String,
+document_clientparty_billing_address_country_confidence_score Float64,
+document_clientparty_billing_address_country_confidence_score_reasoning String,
+
+document_clientparty_billing_address_zip_code_notes           Nullable(String),
+document_clientparty_billing_address_zip_code_value           Nullable(String),
+document_clientparty_billing_address_zip_code_value_reasoning String,
+document_clientparty_billing_address_zip_code_confidence_score Float64,
+document_clientparty_billing_address_zip_code_confidence_score_reasoning String,
+
+document_clientparty_billing_address_full_address_notes           Nullable(String),
+document_clientparty_billing_address_full_address_value           Nullable(String),
+document_clientparty_billing_address_full_address_value_reasoning String,
+document_clientparty_billing_address_full_address_confidence_score Float64,
+document_clientparty_billing_address_full_address_confidence_score_reasoning String,
+
+-- clientparty.designated_zone
+document_clientparty_designated_zone_notes         Nullable(String),
+document_clientparty_designated_zone_value         Nullable(String),
+document_clientparty_designated_zone_value_reasoning String,
+document_clientparty_designated_zone_confidence_score Float64,
+document_clientparty_designated_zone_confidence_score_reasoning String,
+
+-- clientparty.shipping_address.*  (same structure as billing_address)
+
+document_clientparty_is_vat_registered_notes         Nullable(String),
+document_clientparty_is_vat_registered_value         UInt8,
+document_clientparty_is_vat_registered_value_reasoning String,
+document_clientparty_is_vat_registered_confidence_score Float64,
+document_clientparty_is_vat_registered_confidence_score_reasoning String,
+
+document_clientparty_tax_registered_number_notes         Nullable(String),
+document_clientparty_tax_registered_number_value         Nullable(String),
+document_clientparty_tax_registered_number_value_reasoning String,
+document_clientparty_tax_registered_number_confidence_score Float64,
+document_clientparty_tax_registered_number_confidence_score_reasoning String,
+
+document_clientparty_first_original_document_id Nullable(String),
+
+-- counterparty.*  (flatten same pattern as clientparty.*)
+
+is_supported UInt8,
+
+-- document_type
+document_type_notes Nullable(String),
+document_type_value String,
+document_type_value_reasoning String,
+document_type_confidence_score Float64,
+
+structured_by String,
+
+-- is_from_client
+is_from_client_notes Nullable(String),
+is_from_client_value UInt8,
+is_from_client_value_reasoning String,
+is_from_client_confidence_score Float64,
+
+inbound_mail_id Nullable(String),
+
+-- document_quality.quality_level
+document_quality_quality_level_notes Nullable(String),
+document_quality_quality_level_value String,
+document_quality_quality_level_value_reasoning String,
+document_quality_quality_level_confidence_score Float64,
+
+-- document_quality.quality_score
+document_quality_quality_score_notes Nullable(String),
+document_quality_quality_score_value UInt32,
+document_quality_quality_score_value_reasoning String,
+document_quality_quality_score_confidence_score Float64,
+
+-- document_quality.is_good_for_ocr
+document_quality_is_good_for_ocr_notes Nullable(String),
+document_quality_is_good_for_ocr_value UInt8,
+document_quality_is_good_for_ocr_value_reasoning String,
+document_quality_is_good_for_ocr_confidence_score Float64,
+
+-- document_quality.is_cash_document
+document_quality_is_cash_document_notes Nullable(String),
+document_quality_is_cash_document_value UInt8,
+document_quality_is_cash_document_value_reasoning String,
+document_quality_is_cash_document_confidence_score Float64,
+
+-- document_quality.is_source_document
+document_quality_is_source_document_notes Nullable(String),
+document_quality_is_source_document_value UInt8,
+document_quality_is_source_document_value_reasoning String,
+document_quality_is_source_document_confidence_score Float64,
+
+-- document_quality.is_accounting_document
+document_quality_is_accounting_document_notes Nullable(String),
+document_quality_is_accounting_document_value UInt8,
+document_quality_is_accounting_document_value_reasoning String,
+document_quality_is_accounting_document_confidence_score Float64,
+
+-- document_quality.is_human_assistance_required
+document_quality_is_human_assistance_required_notes Nullable(String),
+document_quality_is_human_assistance_required_value UInt8,
+document_quality_is_human_assistance_required_value_reasoning String,
+document_quality_is_human_assistance_required_confidence_score Float64,
+
+-- document_subtype
+document_subtype_notes Nullable(String),
+document_subtype_value String,
+document_subtype_value_reasoning String,
+document_subtype_confidence_score Float64,
+
+is_travel_ticket UInt8,
+is_travel_ticket_notes Nullable(String),
+is_travel_ticket_value_reasoning String,
+is_travel_ticket_confidence_score Float64,
+
+collection_method String,
+
+-- is_client_presented
+is_client_presented_notes Nullable(String),
+is_client_presented_value UInt8,
+is_client_presented_value_reasoning String,
+is_client_presented_confidence_score Float64,
+
+-- is_new_counterparty
+is_new_counterparty_notes Nullable(String),
+is_new_counterparty_value UInt8,
+is_new_counterparty_value_reasoning String,
+is_new_counterparty_confidence_score Float64,
+
+-- source_document_type
+source_document_type_notes Nullable(String),
+source_document_type_value String,
+source_document_type_value_reasoning String,
+source_document_type_confidence_score Float64,
+
+-- source_document_owner
+source_document_owner_notes Nullable(String),
+source_document_owner_value String,
+source_document_owner_value_reasoning String,
+source_document_owner_confidence_score Float64,
+
+original_document_name Nullable(String),
+
+-- source_document_number
+source_document_number_notes Nullable(String),
+source_document_number_value String,
+source_document_number_value_reasoning String,
+source_document_number_confidence_score Float64,
+source_document_number_confidence_score_reasoning String
+)
+ENGINE = MergeTree()
+PARTITION BY toYYYYMM(datetime)
+ORDER BY (clientId, transaction_id, datetime)
+SETTINGS index_granularity = 8192;
+
+-- Профиль без readonly, чтобы разрешить CREATE VIEW
+DROP SETTINGS PROFILE IF EXISTS limited_profile;
+
+CREATE SETTINGS PROFILE limited_profile SETTINGS
+    allow_experimental_lightweight_delete = 0;
+
+-- Удалим пользователя, если уже существует
+DROP USER IF EXISTS ${CLICKHOUSE_USER_READONLY};
+
+-- Создаём пользователя с этим профилем
+CREATE USER ${CLICKHOUSE_USER_READONLY}
+    IDENTIFIED WITH plaintext_password BY '${CLICKHOUSE_PASSWORD_READONLY}'
+    SETTINGS PROFILE 'limited_profile';
+
+-- Даём только необходимые права (нет INSERT, DROP и т.д.)
+GRANT SHOW TABLES, SELECT, CREATE VIEW, DROP VIEW ON ${CLICKHOUSE_DB}.* TO ${CLICKHOUSE_USER_READONLY};
+
+-- Временный пользователь для вставки данных
+DROP USER IF EXISTS temp_loader;
+
+CREATE USER temp_loader IDENTIFIED WITH plaintext_password BY 'loader_pass';
+GRANT ALL ON ${CLICKHOUSE_DB}.* TO temp_loader;
