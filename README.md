@@ -117,3 +117,95 @@ top 5 fields changed for sales transactions last quarter and, for each field, mo
 ![](image/image-2.jpg)
 #### View chart
 ![](image/image-3.jpg)
+
+## Setup and Run Instructions
+
+Follow these steps to set up the environment, restore the necessary data, and launch the project.
+
+### 1. Restore the ClickHouse Database
+
+First, you need to unpack the ClickHouse database and log backups. This is a test database that is required for proper indexing and for Wren AI to utilize pre-existing states.
+
+#### 1.1. Unpack Data
+This command will extract all files from `clickhouse_data_backup.zip` and place them directly into the `clickhouse_data/` directory.
+
+```bash
+unzip backup/clickhouse_data_backup.zip -d clickhouse_data/
+```
+
+#### 1.2. Unpack Logs
+Similarly, unpack the logs into the `clickhouse_logs/` directory.
+
+```bash
+unzip backup/clickhouse_logs_backup.zip -d clickhouse_logs/
+```
+
+### 2. Configure the Application
+
+Adjust the ` .env` and `config.yaml` files to match the AI model you intend to use. You can find configuration examples in the official Wren AI repository:
+*   **Wren AI GitHub:** [https://github.com/Canner/WrenAI](https://github.com/Canner/WrenAI)
+
+### 3. Restore Data Volume and Launch the Project
+
+To ensure data persistence correctly with Docker, the recommended approach is to copy the data from `backup/data_backup` into a Docker named volume. The script below automates this process.
+
+#### Using the Restoration Script
+
+This script reads your `.env` file to determine the project name, creates a dedicated Docker volume, copies the backup data into it, and then starts the project with `docker-compose`.
+
+Save the following code as `restore_and_run.sh`, make it executable (`chmod +x restore_and_run.sh`), and then run it (`./restore_and_run.sh`).
+
+```bash
+#!/bin/bash
+# Script to restore data to a Docker named volume and launch the project
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# --- Step 1: Preparation ---
+echo "--- Reading configuration from .env file ---"
+# Check if the .env file exists
+if [ ! -f .env ]; then
+    echo "Error: .env file not found!"
+    exit 1
+fi
+
+# Get the project name to name the volume correctly
+PROJECT_NAME=$(grep COMPOSE_PROJECT_NAME .env | cut -d '=' -f2)
+DATA_VOLUME_NAME="${PROJECT_NAME}_data"
+BACKUP_SOURCE_DIR="$(pwd)/backup/data_backup"
+
+echo "Project name: ${PROJECT_NAME}"
+echo "Target volume name: ${DATA_VOLUME_NAME}"
+echo "Backup source: ${BACKUP_SOURCE_DIR}"
+
+# Check if the backup source directory exists
+if [ ! -d "$BACKUP_SOURCE_DIR" ]; then
+    echo "Error: Backup directory ${BACKUP_SOURCE_DIR} not found!"
+    exit 1
+fi
+
+# --- Step 2: Restore Data to the Volume ---
+echo "--- Creating volume '${DATA_VOLUME_NAME}' (if it does not exist) ---"
+docker volume inspect ${DATA_VOLUME_NAME} >/dev/null 2>&1 || docker volume create ${DATA_VOLUME_NAME}
+
+echo "--- Copying data from backup to volume ${DATA_VOLUME_NAME} ---"
+# Use a temporary container to copy files into the named volume
+docker run --rm \
+  -v "${DATA_VOLUME_NAME}:/data_volume" \
+  -v "${BACKUP_SOURCE_DIR}:/backup_source:ro" \
+  alpine \
+  sh -c "echo 'Clearing target volume...'; rm -rf /data_volume/*; echo 'Copying...'; cp -a /backup_source/. /data_volume/"
+
+echo "--- Data successfully restored to volume ${DATA_VOLUME_NAME}. ---"
+
+# --- Step 3: Launch the Project ---
+echo "--- Starting the project using docker-compose ---"
+docker compose up -d
+
+echo ""
+echo "--- Done! The project has been launched with the restored data. ---"
+
+```
+
+**Note:** If your `docker-compose.yml` is configured to use a local bind mount (e.g., `./data:/app/data`) instead of a named volume, you can use the simpler, but less robust, method of renaming the `backup/data_backup` directory to `data` in the project root before running `docker compose up -d`. However, the script above is the recommended approach for managing persistent data in Docker.
